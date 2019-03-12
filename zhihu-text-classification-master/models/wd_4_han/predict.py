@@ -67,7 +67,7 @@ def local_predict(sess, model):
                      model.batch_size: _batch_size, model.tst: True, model.keep_prob: 1.0}
         predict_labels = sess.run(fetches, feed_dict)[0]
         predict_scores.append(predict_labels)
-        predict_labels = map(lambda label: label.argsort()[-1:-6:-1], predict_labels)  # 取最大的5个下标
+        predict_labels = list(map(lambda label: label.argsort()[-1:-6:-1], predict_labels))  # 取最大的5个下标
         predict_labels_list.extend(predict_labels)
     predict_label_and_marked_label_list = zip(predict_labels_list, marked_labels_list)
     precision, recall, f1 = score_eval(predict_label_and_marked_label_list)

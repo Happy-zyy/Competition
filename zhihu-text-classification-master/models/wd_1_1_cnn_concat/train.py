@@ -126,7 +126,6 @@ def train_epoch(data_train_path, sess, model, train_fetches, valid_fetches, trai
             test_writer.add_summary(summary, global_step)
 
 
-
 def main(_):
     global ckpt_path
     global last_f1
