@@ -23,14 +23,14 @@ flags.DEFINE_float('lr', 8e-4, 'initial learning rate, default: 8e-4')
 flags.DEFINE_float('decay_rate', 0.75, 'decay rate, default: 0.75')
 flags.DEFINE_float('keep_prob', 0.5, 'keep_prob for training, default: 0.5')
 # 正式
-# flags.DEFINE_integer('decay_step', 15000, 'decay_step, default: 15000')
-# flags.DEFINE_integer('valid_step', 10000, 'valid_step, default: 10000')
-# flags.DEFINE_float('last_f1', 0.40, 'if valid_f1 > last_f1, save new model. default: 0.40')
+flags.DEFINE_integer('decay_step', 15000, 'decay_step, default: 15000')
+flags.DEFINE_integer('valid_step', 10000, 'valid_step, default: 10000')
+flags.DEFINE_float('last_f1', 0.38, 'if valid_f1 > last_f1, save new model. default: 0.40')
 
 # 测试
-flags.DEFINE_integer('decay_step', 1000, 'decay_step, default: 1000')
-flags.DEFINE_integer('valid_step', 500, 'valid_step, default: 500')
-flags.DEFINE_float('last_f1', 0.10, 'if valid_f1 > last_f1, save new model. default: 0.10')
+# flags.DEFINE_integer('decay_step', 1000, 'decay_step, default: 1000')
+# flags.DEFINE_integer('valid_step', 500, 'valid_step, default: 500')
+# flags.DEFINE_float('last_f1', 0.10, 'if valid_f1 > last_f1, save new model. default: 0.10')
 FLAGS = flags.FLAGS
 
 lr = FLAGS.lr
@@ -50,8 +50,8 @@ n_tr_batches = len(tr_batches)
 n_va_batches = len(va_batches)
 
 # 测试
-n_tr_batches = 1000
-n_va_batches = 50
+# n_tr_batches = 1000
+# n_va_batches = 50
 
 
 def get_batch(data_path, batch_id):
@@ -71,7 +71,7 @@ def valid_epoch(data_path, sess, model):
     _costs = 0.0
     predict_labels_list = list()  # 所有的预测结果
     marked_labels_list = list()
-    for i in xrange(n_va_batches):
+    for i in range(n_va_batches):
         [X1_batch, X2_batch, y_batch] = get_batch(data_path, i)
         marked_labels_list.extend(y_batch)
         y_batch = to_categorical(y_batch)
@@ -81,7 +81,7 @@ def valid_epoch(data_path, sess, model):
                      model.batch_size: _batch_size, model.tst: True, model.keep_prob: 1.0}
         _cost, predict_labels = sess.run(fetches, feed_dict)
         _costs += _cost
-        predict_labels = map(lambda label: label.argsort()[-1:-6:-1], predict_labels)  # 取最大的5个下标
+        predict_labels = list(map(lambda label: label.argsort()[-1:-6:-1], predict_labels))  # 取最大的5个下标
         predict_labels_list.extend(predict_labels)
     predict_label_and_marked_label_list = zip(predict_labels_list, marked_labels_list)
     precision, recall, f1 = score_eval(predict_label_and_marked_label_list)
@@ -94,7 +94,7 @@ def train_epoch(data_path, sess, model, train_fetches, valid_fetches, train_writ
     global lr
     time0 = time.time()
     batch_indexs = np.random.permutation(n_tr_batches)  # shuffle the training data
-    for batch in tqdm(xrange(n_tr_batches)):
+    for batch in tqdm(range(n_tr_batches)):
         global_step = sess.run(model.global_step)
         if 0 == (global_step + 1) % FLAGS.valid_step:
             valid_cost, precision, recall, f1 = valid_epoch(data_valid_path, sess, model)
@@ -187,7 +187,7 @@ def main(_):
         print('3.Begin training...')
         print('max_epoch=%d, max_max_epoch=%d' % (FLAGS.max_epoch, FLAGS.max_max_epoch))
         train_op = train_op2
-        for epoch in xrange(FLAGS.max_max_epoch):
+        for epoch in range(FLAGS.max_max_epoch):
             global_step = sess.run(model.global_step)
             print('Global step %d, lr=%g' % (global_step, sess.run(learning_rate)))
             if epoch == FLAGS.max_epoch:  # update the embedding
